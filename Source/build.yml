@@ -1,0 +1,30 @@
+name: Build Follow Delay VST3
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:  # lets you trigger manually from GitHub
+
+jobs:
+  build-windows:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Clone JUCE
+        run: git clone --depth 1 --branch 7.0.12 https://github.com/juce-framework/JUCE.git JUCE
+
+      - name: Configure CMake
+        run: cmake -B build -DJUCE_DIR=JUCE -DCMAKE_BUILD_TYPE=Release
+
+      - name: Build VST3
+        run: cmake --build build --config Release --target FollowDelay_VST3
+
+      - name: Find and upload VST3
+        uses: actions/upload-artifact@v4
+        with:
+          name: FollowDelay-VST3-Windows
+          path: build/FollowDelay_artefacts/Release/VST3/**
+          if-no-files-found: error
